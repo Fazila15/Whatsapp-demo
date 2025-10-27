@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Sana Sarah's Salon — WhatsApp Demo</title>
+<style>
+  body{font-family:Inter,system-ui,Arial;background:#f6f6f8;color:#111;margin:0;display:flex;min-height:100vh;align-items:center;justify-content:center}
+  .device{width:380px;height:780px;border-radius:24px;box-shadow:0 10px 30px rgba(8,10,20,0.12);background:#fff;overflow:hidden;display:flex;flex-direction:column}
+  .header{background:linear-gradient(90deg,#cc9b6e,#f4d1a0);padding:14px;color:#fff;font-weight:700;text-align:center}
+  .chat{flex:1;padding:14px;overflow:auto;display:flex;flex-direction:column;gap:10px;background:#fbfbfc}
+  .msg{max-width:78%;padding:10px 12px;border-radius:12px;font-size:14px}
+  .bot{align-self:flex-start;background:#fff;border:1px solid #eee}
+  .user{align-self:flex-end;background:#cc9b6e;color:#fff}
+  .controls{padding:12px;border-top:1px solid #eee;display:flex;gap:8px;align-items:center}
+  .input{flex:1;padding:10px;border-radius:10px;border:1px solid #ddd}
+  .btn{background:#cc9b6e;color:#fff;padding:8px 12px;border-radius:10px;border:0;cursor:pointer}
+  .options{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+  .opt{background:#fff;border:1px solid #eee;padding:8px 10px;border-radius:8px;cursor:pointer}
+  .small{font-size:13px;color:#666;margin-top:6px}
+  a.link{color:#0b61ff;text-decoration:none}
+  .video{background:#000;color:#fff;padding:8px;border-radius:8px;display:inline-block}
+</style>
+</head>
+<body>
+
+<div class="device" role="region" aria-label="Sana Sarah demo">
+  <div class="header">Sana Sarah's Salon — Demo Chat</div>
+
+  <div id="chat" class="chat"></div>
+
+  <div class="controls">
+    <input id="text" class="input" placeholder='Type "Hi" to start or click suggested options' />
+    <button id="send" class="btn">Send</button>
+  </div>
+</div>
+
+<script>
+/* ====== Flow data (edit links & numbers here) ====== */
+const bookingLink = "https://wa.me/923001234567?text=Hi,+I+want+to+book+an+appointment";
+const supportLink = "https://wa.me/923009876543?text=Hi,+I+have+a+complaint";
+const videos = {
+  engagement: ["https://youtu.be/VIDEO_ENG1", "https://youtu.be/VIDEO_ENG2"],
+  nikah: ["https://youtu.be/VIDEO_NIK1"],
+  mayon: ["https://youtu.be/VIDEO_MAY1"],
+  mehndi: ["https://youtu.be/VIDEO_MEH1","https://youtu.be/VIDEO_MEH2"],
+  barat: ["https://youtu.be/VIDEO_BAR1"],
+  valima: ["https://youtu.be/VIDEO_VAL1"]
+};
+/* =================================================== */
+
+const chatEl = document.getElementById("chat");
+const textEl = document.getElementById("text");
+const sendBtn = document.getElementById("send");
+
+function bot(msg, opts=null){
+  appendMsg(msg, "bot");
+  if(opts) showOptions(opts);
+  chatEl.scrollTop = chatEl.scrollHeight;
+}
+function user(msg){
+  appendMsg(msg, "user");
+  chatEl.scrollTop = chatEl.scrollHeight;
+}
+function appendMsg(text, cls){
+  const d = document.createElement("div");
+  d.className = "msg " + cls;
+  if(cls==="bot"){
+    d.innerHTML = text;
+  } else {
+    d.textContent = text;
+  }
+  chatEl.appendChild(d);
+}
+function clearOptions(){ const el = document.querySelector(".options"); if(el) el.remove(); }
+function showOptions(opts){
+  clearOptions();
+  const wrap = document.createElement("div");
+  wrap.className = "options";
+  opts.forEach(o=>{
+    const b = document.createElement("button");
+    b.className = "opt";
+    b.innerHTML = o.label;
+    b.onclick = ()=> { o.onClick(); };
+    wrap.appendChild(b);
+  });
+  chatEl.appendChild(wrap);
+  chatEl.scrollTop = chatEl.scrollHeight;
+}
+
+/* ====== State & handlers ====== */
+let state = { step: "idle", city:null, branch:null, service:null, artistType:null };
+
+function startFlow(){
+  state = { step: "chooseCity", city:null, branch:null, service:null, artistType:null };
+  bot("Hello 👋 Welcome to Sana Sarah's Salon! Which city are you asking for?", [
+    {label:"Karachi", onClick:()=>chooseCity("Karachi")},
+    {label:"Lahore", onClick:()=>chooseCity("Lahore")},
+    {label:"Hyderabad", onClick:()=>chooseCity("Hyderabad")}
+  ]);
+}
+
+function chooseCity(c){
+  user(c);
+  state.city = c;
+  state.step = "cityChosen";
+  clearOptions();
+  if(c==="Karachi"){
+    bot("Please choose your preferred branch:", [
+      {label:"Johar", onClick:()=>chooseBranch("Johar")},
+      {label:"North Nazimabad", onClick:()=>chooseBranch("North Nazimabad")},
+      {label:"Tariq Road", onClick:()=>chooseBranch("Tariq Road")},
+      {label:"DHA", onClick:()=>chooseBranch("DHA")}
+    ]);
+  } else {
+    askService();
+  }
+}
+
+function chooseBranch(b){
+  user(b);
+  state.branch = b;
+  askService();
+}
+
+function askService(){
+  state.step = "chooseService";
+  bot("Please choose your service:", [
+    {label:"Owner Makeup", onClick:()=>chooseService("Owner Makeup")},
+    {label:"Makeup by Artist", onClick:()=>chooseService("Makeup by Artist")},
+    {label:"Skincare", onClick:()=>chooseService("Skincare")},
+    {label:"Haircare", onClick:()=>chooseService("Haircare")},
+    {label:"Online Booking", onClick:()=>openBooking()},
+    {label:"Complaint / Query", onClick:()=>openSupport()}
+  ]);
+}
+
+function chooseService(s){
+  user(s);
+  state.service = s;
+  clearOptions();
+  if(s==="Owner Makeup"){
+    bot("Please choose the makeup type:", [
+      {label:"Engagement", onClick:()=>chooseCategory("engagement")},
+      {label:"Nikah", onClick:()=>chooseCategory("nikah")},
+      {label:"Mayon", onClick:()=>chooseCategory("mayon")},
+      {label:"Mehndi", onClick:()=>chooseCategory("mehndi")},
+      {label:"Barat", onClick:()=>chooseCategory("barat")},
+      {label:"Valima", onClick:()=>chooseCategory("valima")}
+    ]);
+  } else if(s==="Makeup by Artist"){
+    bot("Please choose your artist category:", [
+      {label:"Signature Artist", onClick:()=>chooseArtist("Signature")},
+      {label:"Senior Artist", onClick:()=>chooseArtist("Senior")},
+      {label:"Expert Artist", onClick:()=>chooseArtist("Expert")}
+    ]);
+  } else if(s==="Skincare" || s==="Haircare"){
+    bot("Please choose an option below:", [
+      {label:"Rate List", onClick:()=>showRateList(s)},
+      {label:"Current Deals", onClick:()=>showDeals(s)}
+    ]);
+  }
+}
+
+function chooseArtist(type){
+  user(type + " Artist");
+  state.artistType = type;
+  bot("Please choose the makeup type for " + type + " Artist:", [
+    {label:"Engagement", onClick:()=>chooseCategory("engagement")},
+    {label:"Nikah", onClick:()=>chooseCategory("nikah")},
+    {label:"Mayon", onClick:()=>chooseCategory("mayon")},
+    {label:"Mehndi", onClick:()=>chooseCategory("mehndi")},
+    {label:"Barat", onClick:()=>chooseCategory("barat")},
+    {label:"Valima", onClick:()=>chooseCategory("valima")}
+  ]);
+}
+
+function chooseCategory(catKey){
+  const nice = catKey.charAt(0).toUpperCase()+catKey.slice(1);
+  user(nice);
+  state.category = catKey;
+  // show videos
+  const vids = (videos[catKey] || []).slice(0,3);
+  let html = `<div class="small">Here are some ${nice} looks 🎥</div>`;
+  vids.forEach((v,i)=>{
+    html += `<div style="margin-top:6px"><a class="video" href="${v}" target="_blank">▶ View Video ${i+1}</a></div>`;
+  });
+  html += `<div class="small" style="margin-top:10px">Would you like to:</div>`;
+  chatEl.appendChild(Object.assign(document.createElement("div"),{className:"msg bot",innerHTML:html}));
+  showOptions([
+    {label:"View Rate List", onClick:()=>viewRate(catKey)},
+    {label:"Book Appointment", onClick:()=>openBooking()},
+    {label:"Main Menu", onClick:()=>startFlow()}
+  ]);
+}
+
+function viewRate(cat){
+  clearOptions();
+  bot("Rate list for " + (cat.charAt(0).toUpperCase()+cat.slice(1)) + ":\n• Service A — PKR 8,000\n• Service B — PKR 12,000\n(These are sample prices. Replace with real rates as needed.)", [
+    {label:"Book Appointment", onClick:()=>openBooking()},
+    {label:"Main Menu", onClick:()=>startFlow()}
+  ]);
+}
+
+function showDeals(s){
+  clearOptions();
+  bot("Current deals for " + s + ":\n• 10% off weekday bookings\n• Package X at PKR 15,000", [
+    {label:"Book Appointment", onClick:()=>openBooking()},
+    {label:"Main Menu", onClick:()=>startFlow()}
+  ]);
+}
+
+function showRateList(s){
+  clearOptions();
+  bot(s + " rate list:\n• Service 1 — PKR 1,500\n• Service 2 — PKR 3,000", [
+    {label:"Book Appointment", onClick:()=>openBooking()},
+    {label:"Main Menu", onClick:()=>startFlow()}
+  ]);
+}
+
+function openBooking(){
+  user("Open Booking");
+  clearOptions();
+  bot('Click to open WhatsApp booking chat: <a class="link" href="' + bookingLink + '" target="_blank">Open Booking</a>', [
+    {label:"Main Menu", onClick:()=>startFlow()}
+  ]);
+}
+
+function openSupport(){
+  user("Complaint / Query");
+  clearOptions();
+  bot('Contact support here: <a class="link" href="' + supportLink + '" target="_blank">Open Support Chat</a>', [
+    {label:"Main Menu", onClick:()=>startFlow()}
+  ]);
+}
+
+/* ====== input handling ====== */
+sendBtn.onclick = ()=>{
+  const t = textEl.value.trim();
+  if(!t) return;
+  textEl.value = "";
+  // simple natural mapping for demo
+  const lower = t.toLowerCase();
+  if(lower==="hi" || lower==="hello") { user(t); startFlow(); return; }
+  user(t);
+  if(["karachi","lahore","hyderabad"].includes(lower)) chooseCity(capitalize(lower));
+  else if(["owner makeup","owner","owner makeup please"].some(x=>lower.includes(x))) chooseService("Owner Makeup");
+  else if(lower.includes("makeup by artist") || lower.includes("artist")) chooseService("Makeup by Artist");
+  else if(lower.includes("skincare")) chooseService("Skincare");
+  else if(lower.includes("haircare")) chooseService("Haircare");
+  else if(lower.includes("booking")) openBooking();
+  else if(lower.includes("complaint") || lower.includes("support")) openSupport();
+  else bot("Sorry I didn't catch that. Type 'Hi' to restart or choose an option.");
+};
+
+function capitalize(s){ return s.charAt(0).toUpperCase()+s.slice(1); }
+
+/* start with a small prompt */
+setTimeout(()=>bot("Type 'Hi' to start the demo — or click any suggested button."),500);
+</script>
+
+</body>
+</html>
