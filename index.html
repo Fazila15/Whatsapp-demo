@@ -58,6 +58,12 @@ a{color:#128c7e;text-decoration:none;}
 .submit-btn{background:#25d366;color:#fff;border:none;padding:8px;border-radius:6px;cursor:pointer;}
 .quickmenu{padding:10px;border-top:1px solid #ccc;background:#fff;display:flex;flex-direction:column;gap:6px;}
 .qbtn{background:#25d366;color:#fff;border:none;border-radius:6px;padding:8px;font-size:14px;cursor:pointer;}
+.rateimg{
+  width:100%;
+  border-radius:10px;
+  margin-top:6px;
+  border:1px solid #ccc;
+}
 </style>
 </head>
 <body>
@@ -88,6 +94,7 @@ const chat=document.getElementById("chat");
 const text=document.getElementById("text");
 const send=document.getElementById("send");
 const quickmenu=document.getElementById("quickmenu");
+let currentBranch="";
 
 function appendMsg(msg,type){
  const d=document.createElement("div");
@@ -126,7 +133,8 @@ function hideQuickMenu(){quickmenu.style.display="none";}
 function showQuickMenu(){quickmenu.style.display="flex";}
 
 function chooseCity(city){
- appendMsg(city,"user");clearOptions();
+ appendMsg(city,"user");
+ clearOptions();
  if(city==="Karachi"){
    appendMsg("Please select your branch:","bot");
    showOptions([
@@ -139,7 +147,12 @@ function chooseCity(city){
    ]);
  } else {chooseBranch(city);}
 }
-function chooseBranch(branch){appendMsg(branch,"user");clearOptions();askService(branch);}
+function chooseBranch(branch){
+ appendMsg(branch,"user");
+ clearOptions();
+ currentBranch=branch;
+ askService(branch);
+}
 
 function askService(branch){
  appendMsg("Please choose your service:","bot");
@@ -156,7 +169,7 @@ function askService(branch){
 function makeupFlow(){
  appendMsg("Makeup selected 💄<br>First, view our Rate List and choose category:","bot");
  showOptions([
-   {label:"View Rate List",onClick:()=>showRateList("Makeup")},
+   {label:"View Rate List",onClick:()=>showRateList(currentBranch)},
    {label:"Owner",onClick:()=>makeupCategory("Owner")},
    {label:"Signature",onClick:()=>makeupCategory("Signature")},
    {label:"Senior",onClick:()=>makeupCategory("Senior")},
@@ -164,7 +177,8 @@ function makeupFlow(){
  ]);
 }
 function makeupCategory(cat){
- appendMsg(cat,"user");clearOptions();
+ appendMsg(cat,"user");
+ clearOptions();
  appendMsg("Select makeup type for "+cat+" category:","bot");
  showOptions([
    {label:"Engagement",onClick:()=>categoryDetail(cat,"engagement")},
@@ -176,10 +190,10 @@ function makeupCategory(cat){
  ]);
 }
 function categoryDetail(cat,key){
- appendMsg(key,"user");clearOptions();
+ appendMsg(key,"user");
+ clearOptions();
  let html=`Here are some ${key} looks 🎥<br>`;
  (videos[key]||[]).forEach((v,i)=>{html+=`<a href="${v}" target="_blank">▶ Video ${i+1}</a><br>`;});
- html+=`<br><b>Rate List:</b><br>• Service A — PKR 8,000<br>• Service B — PKR 12,000<br>`;
  html+=`<br><a href="${bookingLink}" target="_blank">📅 Book Your Appointment</a>`;
  appendMsg(html,"bot");
  showOptions([{label:"Main Menu",onClick:()=>startFlow()}]);
@@ -188,13 +202,27 @@ function skincareHaircare(type){
  appendMsg(type,"user");clearOptions();
  appendMsg(`${type} Options:`,"bot");
  showOptions([
-   {label:"Rate List",onClick:()=>showRateList(type)},
+   {label:"Rate List",onClick:()=>showRateList(currentBranch)},
    {label:"Current Deals",onClick:()=>showDeals(type)},
    {label:"Book Appointment",onClick:()=>bookAppointment()},
    {label:"Main Menu",onClick:()=>startFlow()}
  ]);
 }
-function showRateList(type){appendMsg(`${type} Rate List 📋<br>• Basic ${type} — PKR 2,000<br>• Premium ${type} — PKR 4,000`,"bot");}
+function showRateList(branch){
+ const map={
+   "Johar":"images/johar.jpeg",
+   "Five Star":"images/north-nazimabad.jpeg",
+   "North Spa (N1)":"images/north-nazimabad.jpeg",
+   "North Makeup Studio (N2)":"images/north-nazimabad.jpeg",
+   "Tariq Road":"images/tariq-road.jpeg",
+   "DHA":"images/dha.jpeg",
+   "Lahore":"images/lahore.jpeg",
+   "Hyderabad":"images/hyderabad.jpeg",
+   "All Branches":"images/johar.jpeg"
+ };
+ const img=map[branch]||"images/johar.jpeg";
+ appendMsg(`Rate List for ${branch}:<br><a href="${img}" target="_blank"><img src="${img}" class="rateimg"></a>`,"bot");
+}
 function showDeals(type){appendMsg(`Current Deals for ${type}:<br>• 10% off weekday bookings<br>• Package Special — PKR 12,000`,"bot");}
 function branchInfo(branch){
  clearOptions();
