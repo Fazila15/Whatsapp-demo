@@ -1,263 +1,213 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Sana Sarah's Salon — WhatsApp Demo</title>
 <style>
-  body{font-family:Inter,system-ui,Arial;background:#f6f6f8;color:#111;margin:0;display:flex;min-height:100vh;align-items:center;justify-content:center}
-  .device{width:380px;height:780px;border-radius:24px;box-shadow:0 10px 30px rgba(8,10,20,0.12);background:#fff;overflow:hidden;display:flex;flex-direction:column}
-  .header{background:linear-gradient(90deg,#cc9b6e,#f4d1a0);padding:14px;color:#fff;font-weight:700;text-align:center}
-  .chat{flex:1;padding:14px;overflow:auto;display:flex;flex-direction:column;gap:10px;background:#fbfbfc}
-  .msg{max-width:78%;padding:10px 12px;border-radius:12px;font-size:14px}
-  .bot{align-self:flex-start;background:#fff;border:1px solid #eee}
-  .user{align-self:flex-end;background:#cc9b6e;color:#fff}
-  .controls{padding:12px;border-top:1px solid #eee;display:flex;gap:8px;align-items:center}
-  .input{flex:1;padding:10px;border-radius:10px;border:1px solid #ddd}
-  .btn{background:#cc9b6e;color:#fff;padding:8px 12px;border-radius:10px;border:0;cursor:pointer}
-  .options{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
-  .opt{background:#fff;border:1px solid #eee;padding:8px 10px;border-radius:8px;cursor:pointer}
-  .small{font-size:13px;color:#666;margin-top:6px}
-  a.link{color:#0b61ff;text-decoration:none}
-  .video{background:#000;color:#fff;padding:8px;border-radius:8px;display:inline-block}
+body{font-family:Arial,Helvetica,sans-serif;background:#ece5dd;margin:0;display:flex;align-items:center;justify-content:center;min-height:100vh;}
+.device{width:380px;height:750px;background:#fff;border-radius:25px;box-shadow:0 4px 20px rgba(0,0,0,0.2);display:flex;flex-direction:column;overflow:hidden;}
+.header{background:#075e54;color:#fff;padding:15px;font-weight:bold;text-align:center;font-size:16px;}
+.chat{flex:1;padding:12px;background:#e5ddd5;display:flex;flex-direction:column;overflow:auto;}
+.msg{max-width:80%;margin-bottom:10px;padding:8px 10px;border-radius:10px;font-size:14px;word-wrap:break-word;}
+.bot{align-self:flex-start;background:#fff;}
+.user{align-self:flex-end;background:#dcf8c6;}
+.optlist{display:flex;flex-direction:column;gap:8px;margin:10px 0;}
+.opt{background:#fff;border:1px solid #ccc;border-radius:8px;padding:8px;text-align:left;cursor:pointer;font-size:14px;}
+.controls{display:flex;gap:6px;padding:10px;border-top:1px solid #ccc;background:#f0f0f0;}
+.input{flex:1;padding:8px;border:1px solid #ccc;border-radius:8px;}
+.btn{background:#25d366;color:#fff;border:none;padding:8px 12px;border-radius:8px;cursor:pointer;}
+a{color:#128c7e;text-decoration:none;}
+.form-box{background:#fff;padding:10px;border-radius:8px;display:flex;flex-direction:column;gap:6px;}
+.form-box input,.form-box textarea{width:100%;padding:6px;border:1px solid #ccc;border-radius:5px;}
+.submit-btn{background:#25d366;color:#fff;border:none;padding:8px;border-radius:6px;cursor:pointer;}
+.small{font-size:13px;color:#555;margin-top:4px;}
 </style>
 </head>
 <body>
-
-<div class="device" role="region" aria-label="Sana Sarah demo">
-  <div class="header">Sana Sarah's Salon — Demo Chat</div>
-
+<div class="device">
+  <div class="header">Sana Sarah's Salon 💚</div>
   <div id="chat" class="chat"></div>
-
   <div class="controls">
-    <input id="text" class="input" placeholder='Type "Hi" to start or click suggested options' />
+    <input id="text" class="input" placeholder="Type a message..." />
     <button id="send" class="btn">Send</button>
   </div>
 </div>
 
 <script>
-/* ====== Flow data (edit links & numbers here) ====== */
-const bookingLink = "https://wa.me/923001234567?text=Hi,+I+want+to+book+an+appointment";
-const supportLink = "https://wa.me/923009876543?text=Hi,+I+have+a+complaint";
-const videos = {
-  engagement: ["https://youtu.be/VIDEO_ENG1", "https://youtu.be/VIDEO_ENG2"],
-  nikah: ["https://youtu.be/VIDEO_NIK1"],
-  mayon: ["https://youtu.be/VIDEO_MAY1"],
-  mehndi: ["https://youtu.be/VIDEO_MEH1","https://youtu.be/VIDEO_MEH2"],
-  barat: ["https://youtu.be/VIDEO_BAR1"],
-  valima: ["https://youtu.be/VIDEO_VAL1"]
+const bookingNumber="92138899883";
+const bookingLink="https://wa.me/"+bookingNumber+"?text=Hi,+I+want+to+book+an+appointment";
+const supportLink="https://wa.me/"+bookingNumber+"?text=Hi,+I+have+a+complaint+or+query";
+const videos={
+  engagement:["https://youtu.be/sample1"],
+  nikah:["https://youtu.be/sample2"],
+  mayon:["https://youtu.be/sample3"],
+  mehndi:["https://youtu.be/sample4"],
+  barat:["https://youtu.be/sample5"],
+  valima:["https://youtu.be/sample6"]
 };
-/* =================================================== */
 
-const chatEl = document.getElementById("chat");
-const textEl = document.getElementById("text");
-const sendBtn = document.getElementById("send");
+const chat=document.getElementById("chat");
+const text=document.getElementById("text");
+const send=document.getElementById("send");
 
-function bot(msg, opts=null){
-  appendMsg(msg, "bot");
-  if(opts) showOptions(opts);
-  chatEl.scrollTop = chatEl.scrollHeight;
+function appendMsg(textMsg,type){
+  const div=document.createElement("div");
+  div.className="msg "+type;
+  div.innerHTML=textMsg;
+  chat.appendChild(div);
+  chat.scrollTop=chat.scrollHeight;
 }
-function user(msg){
-  appendMsg(msg, "user");
-  chatEl.scrollTop = chatEl.scrollHeight;
-}
-function appendMsg(text, cls){
-  const d = document.createElement("div");
-  d.className = "msg " + cls;
-  if(cls==="bot"){
-    d.innerHTML = text;
-  } else {
-    d.textContent = text;
-  }
-  chatEl.appendChild(d);
-}
-function clearOptions(){ const el = document.querySelector(".options"); if(el) el.remove(); }
 function showOptions(opts){
-  clearOptions();
-  const wrap = document.createElement("div");
-  wrap.className = "options";
+  const wrap=document.createElement("div");
+  wrap.className="optlist";
   opts.forEach(o=>{
-    const b = document.createElement("button");
-    b.className = "opt";
-    b.innerHTML = o.label;
-    b.onclick = ()=> { o.onClick(); };
+    const b=document.createElement("div");
+    b.className="opt";
+    b.textContent=o.label;
+    b.onclick=o.onClick;
     wrap.appendChild(b);
   });
-  chatEl.appendChild(wrap);
-  chatEl.scrollTop = chatEl.scrollHeight;
+  chat.appendChild(wrap);
+  chat.scrollTop=chat.scrollHeight;
 }
-
-/* ====== State & handlers ====== */
-let state = { step: "idle", city:null, branch:null, service:null, artistType:null };
-
+function clearOptions(){
+  document.querySelectorAll(".optlist").forEach(e=>e.remove());
+}
 function startFlow(){
-  state = { step: "chooseCity", city:null, branch:null, service:null, artistType:null };
-  bot("Hello 👋 Welcome to Sana Sarah's Salon! Which city are you asking for?", [
-    {label:"Karachi", onClick:()=>chooseCity("Karachi")},
-    {label:"Lahore", onClick:()=>chooseCity("Lahore")},
-    {label:"Hyderabad", onClick:()=>chooseCity("Hyderabad")}
+  clearOptions();
+  appendMsg("Welcome to Sana Sarah's Salon! 🌸<br>Please choose your city:", "bot");
+  showOptions([
+    {label:"Karachi",onClick:()=>chooseCity("Karachi")},
+    {label:"Lahore",onClick:()=>chooseCity("Lahore")},
+    {label:"Hyderabad",onClick:()=>chooseCity("Hyderabad")}
   ]);
 }
-
-function chooseCity(c){
-  user(c);
-  state.city = c;
-  state.step = "cityChosen";
+function chooseCity(city){
+  appendMsg(city,"user");
   clearOptions();
-  if(c==="Karachi"){
-    bot("Please choose your preferred branch:", [
-      {label:"Johar", onClick:()=>chooseBranch("Johar")},
-      {label:"North Nazimabad", onClick:()=>chooseBranch("North Nazimabad")},
-      {label:"Tariq Road", onClick:()=>chooseBranch("Tariq Road")},
-      {label:"DHA", onClick:()=>chooseBranch("DHA")}
+  if(city==="Karachi"){
+    appendMsg("Please select your branch:", "bot");
+    showOptions([
+      {label:"Johar",onClick:()=>chooseBranch("Johar")},
+      {label:"Five Star",onClick:()=>chooseBranch("Five Star")},
+      {label:"North Spa (N1)",onClick:()=>chooseBranch("North Spa (N1)")},
+      {label:"North Makeup Studio (N2)",onClick:()=>chooseBranch("North Makeup Studio (N2)")},
+      {label:"Tariq Road",onClick:()=>chooseBranch("Tariq Road")},
+      {label:"DHA",onClick:()=>chooseBranch("DHA")}
     ]);
   } else {
-    askService();
+    chooseBranch(city);
   }
 }
-
-function chooseBranch(b){
-  user(b);
-  state.branch = b;
-  askService();
-}
-
-function askService(){
-  state.step = "chooseService";
-  bot("Please choose your service:", [
-    {label:"Owner Makeup", onClick:()=>chooseService("Owner Makeup")},
-    {label:"Makeup by Artist", onClick:()=>chooseService("Makeup by Artist")},
-    {label:"Skincare", onClick:()=>chooseService("Skincare")},
-    {label:"Haircare", onClick:()=>chooseService("Haircare")},
-    {label:"Online Booking", onClick:()=>openBooking()},
-    {label:"Complaint / Query", onClick:()=>openSupport()}
-  ]);
-}
-
-function chooseService(s){
-  user(s);
-  state.service = s;
+function chooseBranch(branch){
+  appendMsg(branch,"user");
   clearOptions();
-  if(s==="Owner Makeup"){
-    bot("Please choose the makeup type:", [
-      {label:"Engagement", onClick:()=>chooseCategory("engagement")},
-      {label:"Nikah", onClick:()=>chooseCategory("nikah")},
-      {label:"Mayon", onClick:()=>chooseCategory("mayon")},
-      {label:"Mehndi", onClick:()=>chooseCategory("mehndi")},
-      {label:"Barat", onClick:()=>chooseCategory("barat")},
-      {label:"Valima", onClick:()=>chooseCategory("valima")}
-    ]);
-  } else if(s==="Makeup by Artist"){
-    bot("Please choose your artist category:", [
-      {label:"Signature Artist", onClick:()=>chooseArtist("Signature")},
-      {label:"Senior Artist", onClick:()=>chooseArtist("Senior")},
-      {label:"Expert Artist", onClick:()=>chooseArtist("Expert")}
-    ]);
-  } else if(s==="Skincare" || s==="Haircare"){
-    bot("Please choose an option below:", [
-      {label:"Rate List", onClick:()=>showRateList(s)},
-      {label:"Current Deals", onClick:()=>showDeals(s)}
-    ]);
-  }
+  askService(branch);
 }
-
-function chooseArtist(type){
-  user(type + " Artist");
-  state.artistType = type;
-  bot("Please choose the makeup type for " + type + " Artist:", [
-    {label:"Engagement", onClick:()=>chooseCategory("engagement")},
-    {label:"Nikah", onClick:()=>chooseCategory("nikah")},
-    {label:"Mayon", onClick:()=>chooseCategory("mayon")},
-    {label:"Mehndi", onClick:()=>chooseCategory("mehndi")},
-    {label:"Barat", onClick:()=>chooseCategory("barat")},
-    {label:"Valima", onClick:()=>chooseCategory("valima")}
-  ]);
-}
-
-function chooseCategory(catKey){
-  const nice = catKey.charAt(0).toUpperCase()+catKey.slice(1);
-  user(nice);
-  state.category = catKey;
-  // show videos
-  const vids = (videos[catKey] || []).slice(0,3);
-  let html = `<div class="small">Here are some ${nice} looks 🎥</div>`;
-  vids.forEach((v,i)=>{
-    html += `<div style="margin-top:6px"><a class="video" href="${v}" target="_blank">▶ View Video ${i+1}</a></div>`;
-  });
-  html += `<div class="small" style="margin-top:10px">Would you like to:</div>`;
-  chatEl.appendChild(Object.assign(document.createElement("div"),{className:"msg bot",innerHTML:html}));
+function askService(branch){
+  appendMsg("Please choose your service:", "bot");
   showOptions([
-    {label:"View Rate List", onClick:()=>viewRate(catKey)},
-    {label:"Book Appointment", onClick:()=>openBooking()},
-    {label:"Main Menu", onClick:()=>startFlow()}
+    {label:"Makeup",onClick:()=>makeupFlow()},
+    {label:"Skincare",onClick:()=>skincareHaircare("Skincare")},
+    {label:"Haircare",onClick:()=>skincareHaircare("Haircare")},
+    {label:"Book an Appointment",onClick:()=>bookAppointment()},
+    {label:"Branch Time & Location",onClick:()=>branchInfo(branch)},
+    {label:"Complaint & Query",onClick:()=>complaintForm()}
   ]);
 }
-
-function viewRate(cat){
+function makeupFlow(){
+  appendMsg("Makeup selected 💄<br>First, view our Rate List and choose category:", "bot");
+  showOptions([
+    {label:"View Rate List",onClick:()=>showRateList("Makeup")},
+    {label:"Owner",onClick:()=>makeupCategory("Owner")},
+    {label:"Signature",onClick:()=>makeupCategory("Signature")},
+    {label:"Senior",onClick:()=>makeupCategory("Senior")},
+    {label:"Expert",onClick:()=>makeupCategory("Expert")}
+  ]);
+}
+function makeupCategory(cat){
+  appendMsg(cat,"user");
   clearOptions();
-  bot("Rate list for " + (cat.charAt(0).toUpperCase()+cat.slice(1)) + ":\n• Service A — PKR 8,000\n• Service B — PKR 12,000\n(These are sample prices. Replace with real rates as needed.)", [
-    {label:"Book Appointment", onClick:()=>openBooking()},
-    {label:"Main Menu", onClick:()=>startFlow()}
+  appendMsg("Select makeup type for "+cat+" category:", "bot");
+  showOptions([
+    {label:"Engagement",onClick:()=>categoryDetail(cat,"engagement")},
+    {label:"Nikah",onClick:()=>categoryDetail(cat,"nikah")},
+    {label:"Mayon",onClick:()=>categoryDetail(cat,"mayon")},
+    {label:"Mehndi",onClick:()=>categoryDetail(cat,"mehndi")},
+    {label:"Barat",onClick:()=>categoryDetail(cat,"barat")},
+    {label:"Valima",onClick:()=>categoryDetail(cat,"valima")}
   ]);
 }
-
-function showDeals(s){
+function categoryDetail(cat,key){
+  appendMsg(key,"user");
   clearOptions();
-  bot("Current deals for " + s + ":\n• 10% off weekday bookings\n• Package X at PKR 15,000", [
-    {label:"Book Appointment", onClick:()=>openBooking()},
-    {label:"Main Menu", onClick:()=>startFlow()}
-  ]);
+  let html=`Here are some ${key} looks 🎥<br>`;
+  (videos[key]||[]).forEach((v,i)=>{html+=`<a href="${v}" target="_blank">▶ Video ${i+1}</a><br>`;});
+  html+=`<br><b>Rate List:</b><br>• Service A — PKR 8,000<br>• Service B — PKR 12,000<br>`;
+  html+=`<br><a href="${bookingLink}" target="_blank">📅 Book Your Appointment</a>`;
+  appendMsg(html,"bot");
+  showOptions([{label:"Main Menu",onClick:()=>startFlow()}]);
 }
-
-function showRateList(s){
+function skincareHaircare(type){
+  appendMsg(type,"user");
   clearOptions();
-  bot(s + " rate list:\n• Service 1 — PKR 1,500\n• Service 2 — PKR 3,000", [
-    {label:"Book Appointment", onClick:()=>openBooking()},
-    {label:"Main Menu", onClick:()=>startFlow()}
+  appendMsg(`${type} Options:`, "bot");
+  showOptions([
+    {label:"Rate List",onClick:()=>showRateList(type)},
+    {label:"Current Deals",onClick:()=>showDeals(type)},
+    {label:"Book Appointment",onClick:()=>bookAppointment()},
+    {label:"Main Menu",onClick:()=>startFlow()}
   ]);
 }
-
-function openBooking(){
-  user("Open Booking");
+function showRateList(type){
+  appendMsg(type+" Rate List 📋<br>• Basic "+type+" — PKR 2,000<br>• Premium "+type+" — PKR 4,000","bot");
+}
+function showDeals(type){
+  appendMsg("Current Deals for "+type+":<br>• 10% off on weekday bookings<br>• Package Special — PKR 12,000","bot");
+}
+function branchInfo(branch){
   clearOptions();
-  bot('Click to open WhatsApp booking chat: <a class="link" href="' + bookingLink + '" target="_blank">Open Booking</a>', [
-    {label:"Main Menu", onClick:()=>startFlow()}
-  ]);
+  const timing=(branch==="Hyderabad"?"11 AM – 11 PM":"11 AM – 8 PM");
+  appendMsg(`Branch: ${branch}<br>Timings: ${timing}<br>Contact: 021-38899883`, "bot");
+  showOptions([{label:"Main Menu",onClick:()=>startFlow()}]);
 }
-
-function openSupport(){
-  user("Complaint / Query");
+function complaintForm(){
   clearOptions();
-  bot('Contact support here: <a class="link" href="' + supportLink + '" target="_blank">Open Support Chat</a>', [
-    {label:"Main Menu", onClick:()=>startFlow()}
+  appendMsg("Please fill out the complaint form below:", "bot");
+  const form=document.createElement("div");
+  form.className="form-box";
+  form.innerHTML=`<input id="name" placeholder="Your Name"/><textarea id="msg" placeholder="Your Message"></textarea><button class="submit-btn" id="submitForm">Submit</button>`;
+  chat.appendChild(form);
+  chat.scrollTop=chat.scrollHeight;
+  document.getElementById("submitForm").onclick=()=>{
+    const name=document.getElementById("name").value;
+    const msg=document.getElementById("msg").value;
+    form.remove();
+    appendMsg(`Thank you ${name||"Guest"}! Your message has been noted. ✅<br>You can also chat directly on WhatsApp: <a href="${supportLink}" target="_blank">Open Chat</a>`,"bot");
+    showOptions([{label:"Main Menu",onClick:()=>startFlow()}]);
+  };
+}
+function bookAppointment(){
+  appendMsg("📅 Book Your Appointment Here:<br><a href='"+bookingLink+"' target='_blank'>Open WhatsApp Chat</a>","bot");
+}
+function defaultMenu(){
+  appendMsg("Please choose an option below:", "bot");
+  showOptions([
+    {label:"How can I book an appointment?",onClick:()=>bookAppointment()},
+    {label:"Branch locations & timings",onClick:()=>branchInfo("All Branches")},
+    {label:"Further Queries",onClick:()=>complaintForm()}
   ]);
 }
-
-/* ====== input handling ====== */
-sendBtn.onclick = ()=>{
-  const t = textEl.value.trim();
-  if(!t) return;
-  textEl.value = "";
-  // simple natural mapping for demo
-  const lower = t.toLowerCase();
-  if(lower==="hi" || lower==="hello") { user(t); startFlow(); return; }
-  user(t);
-  if(["karachi","lahore","hyderabad"].includes(lower)) chooseCity(capitalize(lower));
-  else if(["owner makeup","owner","owner makeup please"].some(x=>lower.includes(x))) chooseService("Owner Makeup");
-  else if(lower.includes("makeup by artist") || lower.includes("artist")) chooseService("Makeup by Artist");
-  else if(lower.includes("skincare")) chooseService("Skincare");
-  else if(lower.includes("haircare")) chooseService("Haircare");
-  else if(lower.includes("booking")) openBooking();
-  else if(lower.includes("complaint") || lower.includes("support")) openSupport();
-  else bot("Sorry I didn't catch that. Type 'Hi' to restart or choose an option.");
+send.onclick=()=>{
+  const val=text.value.trim();
+  if(!val)return;
+  appendMsg(val,"user");
+  text.value="";
+  clearOptions();
+  if(val.toLowerCase().includes("hi")||val.toLowerCase().includes("hello")) startFlow();
+  else defaultMenu();
 };
-
-function capitalize(s){ return s.charAt(0).toUpperCase()+s.slice(1); }
-
-/* start with a small prompt */
-setTimeout(()=>bot("Type 'Hi' to start the demo — or click any suggested button."),500);
 </script>
-
 </body>
 </html>
