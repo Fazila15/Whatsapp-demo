@@ -8,7 +8,6 @@
 html,body{
   height:100%;
   margin:0;
-  padding:0;
   background:#ece5dd;
   font-family:Arial,Helvetica,sans-serif;
 }
@@ -48,71 +47,30 @@ html,body{
 }
 .bot{align-self:flex-start;background:#fff;}
 .user{align-self:flex-end;background:#dcf8c6;}
-.optlist{
-  display:flex;
-  flex-direction:column;
-  gap:8px;
-  margin:10px 0;
-}
-.opt{
-  background:#fff;
-  border:1px solid #ccc;
-  border-radius:8px;
-  padding:8px;
-  text-align:left;
-  cursor:pointer;
-  font-size:14px;
-}
-.controls{
-  display:flex;
-  gap:6px;
-  padding:8px;
-  border-top:1px solid #ccc;
-  background:#f0f0f0;
-}
-.input{
-  flex:1;
-  padding:8px;
-  border:1px solid #ccc;
-  border-radius:8px;
-}
-.btn{
-  background:#25d366;
-  color:#fff;
-  border:none;
-  padding:8px 12px;
-  border-radius:8px;
-  cursor:pointer;
-}
+.optlist{display:flex;flex-direction:column;gap:8px;margin:10px 0;}
+.opt{background:#fff;border:1px solid #ccc;border-radius:8px;padding:8px;text-align:left;cursor:pointer;font-size:14px;}
+.controls{display:flex;gap:6px;padding:8px;border-top:1px solid #ccc;background:#f0f0f0;}
+.input{flex:1;padding:8px;border:1px solid #ccc;border-radius:8px;}
+.btn{background:#25d366;color:#fff;border:none;padding:8px 12px;border-radius:8px;cursor:pointer;}
 a{color:#128c7e;text-decoration:none;}
-.form-box{
-  background:#fff;
-  padding:10px;
-  border-radius:8px;
-  display:flex;
-  flex-direction:column;
-  gap:6px;
-}
-.form-box input,.form-box textarea{
-  width:100%;
-  padding:6px;
-  border:1px solid #ccc;
-  border-radius:5px;
-}
-.submit-btn{
-  background:#25d366;
-  color:#fff;
-  border:none;
-  padding:8px;
-  border-radius:6px;
-  cursor:pointer;
-}
+.form-box{background:#fff;padding:10px;border-radius:8px;display:flex;flex-direction:column;gap:6px;}
+.form-box input,.form-box textarea{width:100%;padding:6px;border:1px solid #ccc;border-radius:5px;}
+.submit-btn{background:#25d366;color:#fff;border:none;padding:8px;border-radius:6px;cursor:pointer;}
+.quickmenu{padding:10px;border-top:1px solid #ccc;background:#fff;display:flex;flex-direction:column;gap:6px;}
+.qbtn{background:#25d366;color:#fff;border:none;border-radius:6px;padding:8px;font-size:14px;cursor:pointer;}
 </style>
 </head>
 <body>
 <div class="device">
   <div class="header">Sana Sarah's Salon 💚</div>
   <div id="chat" class="chat"></div>
+
+  <!-- quick menu (default visible) -->
+  <div id="quickmenu" class="quickmenu">
+    <button class="qbtn" onclick="bookAppointment()">Book Appointment</button>
+    <button class="qbtn" onclick="branchInfo('All Branches')">Branch Locations & Timings</button>
+    <button class="qbtn" onclick="complaintForm()">Further Queries</button>
+  </div>
 
   <div class="controls">
     <input id="text" class="input" placeholder="Type a message..." />
@@ -129,6 +87,7 @@ const videos={engagement:["https://youtu.be/sample1"],nikah:["https://youtu.be/s
 const chat=document.getElementById("chat");
 const text=document.getElementById("text");
 const send=document.getElementById("send");
+const quickmenu=document.getElementById("quickmenu");
 
 function appendMsg(msg,type){
  const d=document.createElement("div");
@@ -137,7 +96,6 @@ function appendMsg(msg,type){
  chat.appendChild(d);
  chat.scrollTop=chat.scrollHeight;
 }
-
 function showOptions(opts){
  clearOptions();
  const wrap=document.createElement("div");
@@ -155,6 +113,7 @@ function showOptions(opts){
 function clearOptions(){document.querySelectorAll(".optlist").forEach(e=>e.remove());}
 
 function startFlow(){
+ hideQuickMenu();
  clearOptions();
  appendMsg("Welcome to Sana Sarah's Salon! 🌸<br>Please choose your city:","bot");
  showOptions([
@@ -163,6 +122,8 @@ function startFlow(){
    {label:"Hyderabad",onClick:()=>chooseCity("Hyderabad")}
  ]);
 }
+function hideQuickMenu(){quickmenu.style.display="none";}
+function showQuickMenu(){quickmenu.style.display="flex";}
 
 function chooseCity(city){
  appendMsg(city,"user");clearOptions();
@@ -271,8 +232,10 @@ send.onclick=()=>{
  appendMsg(val,"user");
  text.value="";
  clearOptions();
- if(val.toLowerCase().includes("hi")||val.toLowerCase().includes("hello")) startFlow();
- else defaultMenu();
+ if(val.toLowerCase().includes("hi")||val.toLowerCase().includes("hello")){
+   hideQuickMenu();
+   startFlow();
+ } else defaultMenu();
 };
 </script>
 </body>
